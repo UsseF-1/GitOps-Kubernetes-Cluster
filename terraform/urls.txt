@@ -1,0 +1,7 @@
+cluster_endpoint = "https://0119CFA612F0BE4371AE1DA9DD7F254A.gr7.us-east-1.eks.amazonaws.com"
+cluster_name = "voting-cluster"
+ecr_result_url = "569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-result"
+ecr_vote_url = "569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-vote"
+ecr_worker_url = "569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-worker"
+kubeconfig_command = "aws eks update-kubeconfig --region us-east-1 --name voting-cluster"
+vpc_id = "vpc-0cea60c3ef92329ef"
