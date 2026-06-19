@@ -1,0 +1,31 @@
+🗳  Voting App — {{ .Release.Name }} deployed successfully!
+
+Namespace : {{ .Values.namespace }}
+Chart     : {{ .Chart.Name }}-{{ .Chart.Version }}
+AppVersion: {{ .Chart.AppVersion }}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SERVICES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Vote    → {{ .Values.vote.service.name }}:{{ .Values.vote.service.port }}
+  Result  → {{ .Values.result.service.name }}:{{ .Values.result.service.port }}
+  DB      → {{ .Values.db.service.name }}:{{ .Values.db.service.port }}
+  Redis   → {{ .Values.redis.service.name }}:{{ .Values.redis.service.port }}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  INGRESS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{{- if .Values.ingress.enabled }}
+  http://{{ if .Values.ingress.host }}{{ .Values.ingress.host }}{{ else }}<EXTERNAL-IP>{{ end }}/         → Vote UI
+  http://{{ if .Values.ingress.host }}{{ .Values.ingress.host }}{{ else }}<EXTERNAL-IP>{{ end }}/result   → Result UI
+{{- else }}
+  Ingress is disabled.
+{{- end }}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  USEFUL COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  kubectl get pods -n {{ .Values.namespace }}
+  kubectl get svc  -n {{ .Values.namespace }}
+  helm status {{ .Release.Name }}
+  helm history {{ .Release.Name }}

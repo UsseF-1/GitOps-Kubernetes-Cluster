@@ -1,0 +1,12 @@
+apiVersion: v2
+name: voting-app
+description: A GitOps Kubernetes Voting Application Helm Chart
+type: application
+version: 1.0.0
+appVersion: "V1.0"
+keywords:
+  - voting
+  - gitops
+  - kubernetes
+maintainers:
+  - name: DEPI Team

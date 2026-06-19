@@ -1,0 +1,31 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: voting-app-ingress
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "voting-app.labels" . | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - {{- if .Values.ingress.host }}
+      host: {{ .Values.ingress.host }}
+      {{- end }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.paths.vote.path }}
+            pathType: {{ .Values.ingress.paths.vote.pathType }}
+            backend:
+              service:
+                name: {{ .Values.vote.service.name }}
+                port:
+                  number: {{ .Values.vote.service.port }}
+          - path: {{ .Values.ingress.paths.result.path }}
+            pathType: {{ .Values.ingress.paths.result.pathType }}
+            backend:
+              service:
+                name: {{ .Values.result.service.name }}
+                port:
+                  number: {{ .Values.result.service.port }}
+{{- end }}

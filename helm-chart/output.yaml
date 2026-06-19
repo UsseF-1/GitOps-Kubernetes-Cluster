@@ -1,0 +1,526 @@
+---
+# Source: voting-app/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+type: Opaque
+data:
+  POSTGRES_PASSWORD: cG9zdGdyZXM=
+---
+# Source: voting-app/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+data:
+  POSTGRES_USER: "postgres"
+  POSTGRES_DB: "postgres"
+  POSTGRES_HOST: "svc-db"
+  REDIS_HOST: "svc-redis"
+---
+# Source: voting-app/templates/storageclass.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: storage-class-db
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: ebs.csi.aws.com
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+mountOptions:
+  - discard
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  guaranteedReadWriteLatency: "true"
+---
+# Source: voting-app/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-db
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: storage-class-db
+---
+# Source: voting-app/templates/services/db-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-db
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+    app: db
+spec:
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: db-port
+  type: ClusterIP
+---
+# Source: voting-app/templates/services/redis-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-redis
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+    app: redis
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: redis-port
+  type: ClusterIP
+---
+# Source: voting-app/templates/services/result-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-result
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+    app: result
+spec:
+  selector:
+    app: result
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: result-port
+  type: ClusterIP
+---
+# Source: voting-app/templates/services/vote-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-vote
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+    app: vote
+spec:
+  selector:
+    app: vote
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: vote-port
+  type: ClusterIP
+---
+# Source: voting-app/templates/deployments/db-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deploy
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+    app: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: voting-app-1.0.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/instance: voting-app
+        app.kubernetes.io/version: "V1.0"
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: db-port
+          volumeMounts:
+            - name: db-storage
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: POSTGRES_DB
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: POSTGRES_PASSWORD
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command:
+              - pg_isready
+              - -U
+              - postgres
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+              - pg_isready
+              - -U
+              - postgres
+            initialDelaySeconds: 30
+            periodSeconds: 20
+      volumes:
+        - name: db-storage
+          persistentVolumeClaim:
+            claimName: pvc-db
+---
+# Source: voting-app/templates/deployments/redis-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-db
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: voting-app-1.0.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/instance: voting-app
+        app.kubernetes.io/version: "V1.0"
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              name: redis-port
+          resources:
+            limits:
+              cpu: 250m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            exec:
+              command:
+              - redis-cli
+              - ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+              - redis-cli
+              - ping
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+# Source: voting-app/templates/deployments/result-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: result-db
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+    app: result
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: result
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: voting-app-1.0.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/instance: voting-app
+        app.kubernetes.io/version: "V1.0"
+        app: result
+    spec:
+      containers:
+        - name: result
+          image: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-result:V1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4000
+              name: result-port
+          env:
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: POSTGRES_HOST
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: POSTGRES_DB
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: POSTGRES_PASSWORD
+          resources:
+            limits:
+              cpu: 250m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+# Source: voting-app/templates/deployments/vote-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-db
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+    app: vote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vote
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: voting-app-1.0.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/instance: voting-app
+        app.kubernetes.io/version: "V1.0"
+        app: vote
+    spec:
+      containers:
+        - name: vote
+          image: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-vote:V1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: vote-port
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: REDIS_HOST
+          resources:
+            limits:
+              cpu: 250m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+# Source: voting-app/templates/deployments/worker-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-db
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+    app: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: voting-app-1.0.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/instance: voting-app
+        app.kubernetes.io/version: "V1.0"
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-worker:V1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4000
+              name: worker-port
+          env:
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: POSTGRES_HOST
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: POSTGRES_DB
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map
+                  key: REDIS_HOST
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: POSTGRES_PASSWORD
+          resources:
+            limits:
+              cpu: 250m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+# Source: voting-app/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: voting-app-ingress
+  namespace: default
+  labels:
+    helm.sh/chart: voting-app-1.0.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: voting-app
+    app.kubernetes.io/version: "V1.0"
+spec:
+  ingressClassName: nginx
+  rules:
+    -
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-vote
+                port:
+                  number: 80
+          - path: /result
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-result
+                port:
+                  number: 4000
+---
+# Source: voting-app/templates/hpa.yaml
+---
