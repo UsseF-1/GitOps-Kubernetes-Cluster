@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-db
+  labels:
+    app: worker
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+
+  template:
+    metadata:
+      labels:
+        app: worker
+
+    spec:
+      containers:
+      - name: worker
+        image: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-worker:V1.0
+
+        ports:
+        - containerPort: 4000
+          name: worker-port
+
+        env:
+          - name: POSTGRES_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: config-map
+                key: POSTGRES_HOST
+
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                name: config-map
+                key: POSTGRES_USER
+
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                name: config-map
+                key: POSTGRES_DB
+
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: config-map
+                key: REDIS_HOST
+
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret
+                key: POSTGRES_PASSWORD

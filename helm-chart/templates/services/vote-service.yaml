@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.vote.service.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "voting-app.labels" . | nindent 4 }}
+    {{- include "voting-app.selectorLabels" (dict "component" "vote") | nindent 4 }}
+spec:
+  selector:
+    {{- include "voting-app.selectorLabels" (dict "component" "vote") | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.vote.service.port }}
+      targetPort: vote-port
+  type: {{ .Values.vote.service.type }}

@@ -1,0 +1,200 @@
+namespace: default
+
+registry: 569033310103.dkr.ecr.us-east-1.amazonaws.com
+
+configMap:
+  name: config-map
+  postgres:
+    host: svc-db
+    user: postgres
+    db: postgres
+  redis:
+    host: svc-redis
+
+secret:
+  name: secret
+  postgres:
+    password: cG9zdGdyZXM=  # base64: postgres
+
+# ── Vote ──────────────────────────────────────────────
+vote:
+  replicaCount: 1
+  image:
+    repository: voting-app-vote
+    tag: "V1.0"
+    pullPolicy: IfNotPresent
+  containerPort: 80
+  service:
+    name: svc-vote
+    port: 80
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 15
+    periodSeconds: 20
+  hpa:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+# ── Result ────────────────────────────────────────────
+result:
+  replicaCount: 1
+  image:
+    repository: voting-app-result
+    tag: "V1.0"
+    pullPolicy: IfNotPresent
+  containerPort: 4000
+  service:
+    name: svc-result
+    port: 4000
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 4000
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 4000
+    initialDelaySeconds: 15
+    periodSeconds: 20
+  hpa:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+# ── Worker ────────────────────────────────────────────
+worker:
+  replicaCount: 1
+  image:
+    repository: voting-app-worker
+    tag: "V1.0"
+    pullPolicy: IfNotPresent
+  containerPort: 4000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  hpa:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+# ── Database ──────────────────────────────────────────
+db:
+  replicaCount: 1
+  image:
+    repository: postgres
+    tag: "15-alpine"
+    pullPolicy: IfNotPresent
+  containerPort: 5432
+  service:
+    name: svc-db
+    port: 5432
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  readinessProbe:
+    exec:
+      command: ["pg_isready", "-U", "postgres"]
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  livenessProbe:
+    exec:
+      command: ["pg_isready", "-U", "postgres"]
+    initialDelaySeconds: 30
+    periodSeconds: 20
+
+# ── Redis ─────────────────────────────────────────────
+redis:
+  replicaCount: 1
+  image:
+    repository: redis
+    tag: "alpine"
+    pullPolicy: IfNotPresent
+  containerPort: 6379
+  service:
+    name: svc-redis
+    port: 6379
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+  readinessProbe:
+    exec:
+      command: ["redis-cli", "ping"]
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  livenessProbe:
+    exec:
+      command: ["redis-cli", "ping"]
+    initialDelaySeconds: 15
+    periodSeconds: 20
+
+# ── Storage ───────────────────────────────────────────
+storageClass:
+  name: storage-class-db
+  provisioner: ebs.csi.aws.com
+  reclaimPolicy: Retain
+  allowVolumeExpansion: true
+  volumeBindingMode: WaitForFirstConsumer
+  isDefault: "false"
+
+pvc:
+  name: pvc-db
+  accessMode: ReadWriteOnce
+  storage: 5Gi
+  storageClassName: storage-class-db
+
+# ── Ingress ───────────────────────────────────────────
+ingress:
+  enabled: true
+  className: nginx
+  host: ""
+  paths:
+    vote:
+      path: /
+      pathType: Prefix
+    result:
+      path: /result
+      pathType: Prefix

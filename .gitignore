@@ -1,0 +1,149 @@
+# Local .terraform directories
+**/.terraform/
+**/.terraform.lock.hcl
+
+# Terraform state files 
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+*.tfstate.lock.info
+
+# Terraform plan files
+*.tfplan
+*.tfplan.json
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform variable files
+*.tfvars
+*.tfvars.json
+terraform.tfvars
+terraform.tfvars.json
+**/terraform.tfvars
+**/terraform.tfvars.json
+
+# Terraform provider lock files
+.terraform.lock.hcl
+
+# ============================================
+# AWS Credentials & Configuration
+# ============================================
+
+# AWS CLI credentials
+.aws/
+**/.aws/
+credentials
+config
+
+# AWS access keys (NEVER commit these!)
+*access_key*
+*secret_key*
+*.pem
+*.ppk
+*.key
+
+# Kubeconfig files
+**/kubeconfig
+**/.kube/
+~/.kube/config
+kubeconfig_*
+*.kubeconfig
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.*.swp
+
+# Environment variables
+.env
+.env.*
+*.env
+
+# Docker files 
+*.dockerignore
+**/docker-compose.override.yml
+
+# ============================================
+# CI/CD & Build Artifacts
+# ============================================
+
+# Build artifacts
+dist/
+build/
+node_modules/
+**/node_modules/
+*.pyc
+__pycache__/
+
+# GitHub Actions (temporary files)
+.github/tmp/
+.github/.cache/
+
+# Helm charts (local packages)
+*.tgz
+**/charts/*.tgz
+
+# ============================================
+# Sensitive Files (Double-check these!)
+# ============================================
+
+# Never commit these!
+secrets/
+private/
+*.secret
+*.secrets
+secret.*
+credentials.*
+*.keychain
+
+# SSH keys
+id_rsa
+id_dsa
+*.p12
+*.pfx
+
+# ============================================
+# Testing & Temporary Files
+# ============================================
+
+# Test reports
+test-results/
+coverage/
+*.test
+*.test.exe
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# ============================================
+# Documentation (build output)
+# ============================================
+
+# Generated documentation
+docs/_build/
+site/
+
+# ============================================
+# Team-Specific Files
+# ============================================
+
+# Team member local configurations
+*.local
+*.local.*
+*-local
+*-personal

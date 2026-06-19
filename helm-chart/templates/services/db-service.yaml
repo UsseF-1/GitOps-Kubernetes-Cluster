@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.db.service.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "voting-app.labels" . | nindent 4 }}
+    {{- include "voting-app.selectorLabels" (dict "component" "db") | nindent 4 }}
+spec:
+  selector:
+    {{- include "voting-app.selectorLabels" (dict "component" "db") | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.db.service.port }}
+      targetPort: db-port
+  type: {{ .Values.db.service.type }}
