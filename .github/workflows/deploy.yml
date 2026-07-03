@@ -1,0 +1,73 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+
+env:
+  AWS_REGION: us-east-1
+  ECR_VOTE: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-vote
+  ECR_RESULT: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-result
+  ECR_WORKER: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-worker
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Vote Image
+        run: |
+          docker build -t $ECR_VOTE:${{ github.sha }} -f docker/vote/dockerfile.Dockerfile docker/vote
+
+      - name: Build Result Image
+        run: |
+          docker build -t $ECR_RESULT:${{ github.sha }} -f docker/result/dockerfile.Dockerfile docker/result
+
+      - name: Build Worker Image
+        run: |
+          docker build -t $ECR_WORKER:${{ github.sha }} -f docker/worker/dockerfile.Dockerfile docker/worker
+
+      - name: Scan Vote Image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.ECR_VOTE }}:${{ github.sha }}
+          exit-code: '1'
+          severity: CRITICAL
+
+      - name: Scan Result Image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.ECR_RESULT }}:${{ github.sha }}
+          exit-code: '1'
+          severity: CRITICAL
+
+      - name: Scan Worker Image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.ECR_WORKER }}:${{ github.sha }}
+          exit-code: '1'
+          severity: CRITICAL
+
+      - name: Push Vote Image
+        run: docker push $ECR_VOTE:${{ github.sha }}
+
+      - name: Push Result Image
+        run: docker push $ECR_RESULT:${{ github.sha }}
+
+      - name: Push Worker Image
+        run: docker push $ECR_WORKER:${{ github.sha }}
