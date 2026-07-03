@@ -46,21 +46,21 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.ECR_VOTE }}:${{ github.sha }}
-          exit-code: '0'
+          exit-code: '1'
           severity: CRITICAL
 
       - name: Scan Result Image
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.ECR_RESULT }}:${{ github.sha }}
-          exit-code: '0'
+          exit-code: '1'
           severity: CRITICAL
 
       - name: Scan Worker Image
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.ECR_WORKER }}:${{ github.sha }}
-          exit-code: '0'
+          exit-code: '1'
           severity: CRITICAL
 
       - name: Push Vote Image
@@ -71,3 +71,27 @@ jobs:
 
       - name: Push Worker Image
         run: docker push $ECR_WORKER:${{ github.sha }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region $AWS_REGION --name voting-cluster
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Helm upgrade
+        run: |
+          helm upgrade --install voting-app ./helm/voting-app \
+            --set vote.image.tag=${{ github.sha }} \
+            --set result.image.tag=${{ github.sha }} \
+            --set worker.image.tag=${{ github.sha }}
+
+      - name: Verify pods are running
+        run: kubectl get pods
+
