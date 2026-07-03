@@ -87,7 +87,7 @@ jobs:
 
       - name: Helm upgrade
         run: |
-          helm upgrade --install voting-app ./helm/voting-app \
+          helm upgrade --install voting-app ./helm-chart \
             --set vote.image.tag=${{ github.sha }} \
             --set result.image.tag=${{ github.sha }} \
             --set worker.image.tag=${{ github.sha }}
