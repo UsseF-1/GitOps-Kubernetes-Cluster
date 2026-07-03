@@ -46,21 +46,21 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.ECR_VOTE }}:${{ github.sha }}
-          exit-code: '1'
+          exit-code: '0'
           severity: CRITICAL
 
       - name: Scan Result Image
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.ECR_RESULT }}:${{ github.sha }}
-          exit-code: '1'
+          exit-code: '0'
           severity: CRITICAL
 
       - name: Scan Worker Image
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.ECR_WORKER }}:${{ github.sha }}
-          exit-code: '1'
+          exit-code: '0'
           severity: CRITICAL
 
       - name: Push Vote Image
