@@ -226,32 +226,32 @@ resource "aws_eks_node_group" "main" {
 }
 
 # 9. ECR Repositories - Image Storage
-resource "aws_ecr_repository" "vote" {
-  name                 = "${var.project_name}-vote"
-  image_tag_mutability = "MUTABLE"
+# resource "aws_ecr_repository" "vote" {
+#   name                 = "${var.project_name}-vote"
+#   image_tag_mutability = "MUTABLE"
 
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
+#   image_scanning_configuration {
+#     scan_on_push = true
+#   }
+# }
 
-resource "aws_ecr_repository" "result" {
-  name                 = "${var.project_name}-result"
-  image_tag_mutability = "MUTABLE"
+# resource "aws_ecr_repository" "result" {
+#   name                 = "${var.project_name}-result"
+#   image_tag_mutability = "MUTABLE"
 
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
+#   image_scanning_configuration {
+#     scan_on_push = true
+#   }
+# }
 
-resource "aws_ecr_repository" "worker" {
-  name                 = "${var.project_name}-worker"
-  image_tag_mutability = "MUTABLE"
+# resource "aws_ecr_repository" "worker" {
+#   name                 = "${var.project_name}-worker"
+#   image_tag_mutability = "MUTABLE"
 
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
+#   image_scanning_configuration {
+#     scan_on_push = true
+#   }
+# }
 # 10. Elastic IPs for NAT Gateway
 resource "aws_eip" "nat" {
   count  = length(var.availability_zones)
