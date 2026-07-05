@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deploy
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "voting-app.labels" . | nindent 4 }}
+    {{- include "voting-app.selectorLabels" (dict "component" "db") | nindent 4 }}
+spec:
+  replicas: {{ .Values.db.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "voting-app.selectorLabels" (dict "component" "db") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "voting-app.labels" . | nindent 8 }}
+        {{- include "voting-app.selectorLabels" (dict "component" "db") | nindent 8 }}
+    spec:
+      containers:
+        - name: db
+          image: {{ include "voting-app.image" (dict "registry" "" "image" .Values.db.image) }}
+          imagePullPolicy: {{ .Values.db.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.db.containerPort }}
+              name: db-port
+          volumeMounts:
+            - name: db-storage
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "voting-app.configMapName" . }}
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "voting-app.configMapName" . }}
+                  key: POSTGRES_DB
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "voting-app.secretName" . }}
+                  key: POSTGRES_PASSWORD
+          resources:
+            {{- toYaml .Values.db.resources | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.db.readinessProbe | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.db.livenessProbe | nindent 12 }}
+      volumes:
+        - name: db-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.pvc.name }}

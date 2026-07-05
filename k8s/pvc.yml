@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-db
+spec:
+  # Defines how the volume can be mounted (e.g., ReadWriteOnce, ReadWriteMany)
+  accessModes:
+    - ReadWriteOnce
+  # Requests a specific size
+  resources:
+    requests:
+      storage: 5Gi
+  # Optional: specify a StorageClass for dynamic provisioning
+  storageClassName: storage-class-db

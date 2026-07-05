@@ -1,0 +1,14 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: storage-class-db
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: ebs.csi.aws.com
+reclaimPolicy: Retain # default value is Delete retain ==> if pvc deleted, data still exist in EBS
+allowVolumeExpansion: true
+mountOptions:
+  - discard # this might enable UNMAP / TRIM at the block storage layer
+volumeBindingMode: WaitForFirstConsumer # Best For DB
+parameters:
+  guaranteedReadWriteLatency: "true" # provider-specific
