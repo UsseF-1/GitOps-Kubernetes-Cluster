@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deploy
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "voting-app.labels" . | nindent 4 }}
+    {{- include "voting-app.selectorLabels" (dict "component" "redis") | nindent 4 }}
+spec:
+  replicas: {{ .Values.redis.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "voting-app.selectorLabels" (dict "component" "redis") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "voting-app.labels" . | nindent 8 }}
+        {{- include "voting-app.selectorLabels" (dict "component" "redis") | nindent 8 }}
+    spec:
+      containers:
+        - name: redis
+          image: {{ include "voting-app.image" (dict "registry" "" "image" .Values.redis.image) }}
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.redis.containerPort }}
+              name: redis-port
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.redis.readinessProbe | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.redis.livenessProbe | nindent 12 }}

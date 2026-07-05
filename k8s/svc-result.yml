@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-result
+  labels:
+    app: result
+spec:
+  selector:
+    app: result
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: result-port
+  type: ClusterIP
