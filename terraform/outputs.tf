@@ -1,17 +1,17 @@
-output "ecr_vote_url" {
-  description = "ECR repository URL for vote service"
-  value       = aws_ecr_repository.vote.repository_url
-}
+# output "ecr_vote_url" {
+#   description = "ECR repository URL for vote service"
+#   value       = aws_ecr_repository.vote.repository_url
+# }
 
-output "ecr_result_url" {
-  description = "ECR repository URL for result service"
-  value       = aws_ecr_repository.result.repository_url
-}
+# output "ecr_result_url" {
+#   description = "ECR repository URL for result service"
+#   value       = aws_ecr_repository.result.repository_url
+# }
 
-output "ecr_worker_url" {
-  description = "ECR repository URL for worker service"
-  value       = aws_ecr_repository.worker.repository_url
-}
+# output "ecr_worker_url" {
+#   description = "ECR repository URL for worker service"
+#   value       = aws_ecr_repository.worker.repository_url
+# }
 
 output "cluster_name" {
   description = "EKS cluster name"
