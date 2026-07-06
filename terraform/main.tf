@@ -177,7 +177,12 @@ resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
   version  = var.kubernetes_version
-
+  access_config {
+    authentication_mode = "API_AND_CONFIG_MAP"
+  }
+  lifecycle {
+    ignore_changes = [access_config]
+  }
   vpc_config {
     subnet_ids              = concat(aws_subnet.public[*].id, aws_subnet.private[*].id)
     endpoint_private_access = true
@@ -226,32 +231,32 @@ resource "aws_eks_node_group" "main" {
 }
 
 # 9. ECR Repositories - Image Storage
-resource "aws_ecr_repository" "vote" {
-  name                 = "${var.project_name}-vote"
-  image_tag_mutability = "MUTABLE"
+# resource "aws_ecr_repository" "vote" {
+#   name                 = "${var.project_name}-vote"
+#   image_tag_mutability = "MUTABLE"
 
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
+#   image_scanning_configuration {
+#     scan_on_push = true
+#   }
+# }
 
-resource "aws_ecr_repository" "result" {
-  name                 = "${var.project_name}-result"
-  image_tag_mutability = "MUTABLE"
+# resource "aws_ecr_repository" "result" {
+#   name                 = "${var.project_name}-result"
+#   image_tag_mutability = "MUTABLE"
 
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
+#   image_scanning_configuration {
+#     scan_on_push = true
+#   }
+# }
 
-resource "aws_ecr_repository" "worker" {
-  name                 = "${var.project_name}-worker"
-  image_tag_mutability = "MUTABLE"
+# resource "aws_ecr_repository" "worker" {
+#   name                 = "${var.project_name}-worker"
+#   image_tag_mutability = "MUTABLE"
 
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
+#   image_scanning_configuration {
+#     scan_on_push = true
+#   }
+# }
 # 10. Elastic IPs for NAT Gateway
 resource "aws_eip" "nat" {
   count  = length(var.availability_zones)
@@ -302,4 +307,21 @@ resource "aws_route_table_association" "private" {
 resource "aws_iam_role_policy_attachment" "nodes_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.eks_nodes.name
+}
+
+data "aws_caller_identity" "current" {}
+
+resource "aws_eks_access_entry" "github_actions" {
+  cluster_name  = aws_eks_cluster.main.name
+  principal_arn = "arn:aws:iam::569033310103:user/moaz-cicd"
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "github_actions_admin" {
+  cluster_name  = aws_eks_cluster.main.name
+  principal_arn = "arn:aws:iam::569033310103:user/moaz-cicd"
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  access_scope {
+    type = "cluster"
+  }
 }

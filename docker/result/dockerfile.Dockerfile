@@ -1,4 +1,4 @@
-FROM node:18-slim
+FROM node:20-bookworm-slim
 WORKDIR /app
 ENV PORT=80
 COPY package*.json ./
