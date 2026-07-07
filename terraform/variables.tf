@@ -21,11 +21,11 @@ variable "cluster_name" {
 }
 variable "node_instance_type" {
   description = "EC2 instance for node group"
-  default     = "t3.micro"
+  default     = "t3.small"
 }
 variable "node_group_size" {
   description = "Node group size"
-  default     = 2
+  default     = 3
 }
 variable "kubernetes_version" {
   description = "Kubernetes version for EKS cluster"
