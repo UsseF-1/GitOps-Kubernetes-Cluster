@@ -1,0 +1,19 @@
+---
+- name: Create DevOps user
+  hosts: local
+  become: true
+
+  tasks:
+
+    - name: Create devops user
+      user:
+        name: "{{ devops_user }}"
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Add devops to sudo group
+      user:
+        name: "{{ devops_user }}"
+        groups: sudo
+        append: yes 

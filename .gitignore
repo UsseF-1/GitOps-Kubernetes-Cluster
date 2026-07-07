@@ -1,149 +1,103 @@
-# Local .terraform directories
+# ============================
+# Terraform
+# ============================
 **/.terraform/
-**/.terraform.lock.hcl
-
-# Terraform state files 
 *.tfstate
 *.tfstate.*
-*.tfstate.backup
-*.tfstate.lock.info
-
-# Terraform plan files
-*.tfplan
-*.tfplan.json
-
-# Crash log files
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
 crash.log
 crash.*.log
-
-# Override files
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
-
-# Terraform variable files
-*.tfvars
-*.tfvars.json
-terraform.tfvars
-terraform.tfvars.json
-**/terraform.tfvars
-**/terraform.tfvars.json
-
-# Terraform provider lock files
 .terraform.lock.hcl
 
-# ============================================
-# AWS Credentials & Configuration
-# ============================================
+# ============================
+# Kubernetes / Helm
+# ============================
+**/kubeconfig*
+**/kubeconfig.txt
+**/urls.txt
+**/output.yaml
+**/helm-chart/**/*.tgz
+**/helm-chart/**/charts/
+**/helm-chart/**/Chart.lock
 
-# AWS CLI credentials
-.aws/
-**/.aws/
-credentials
-config
-
-# AWS access keys (NEVER commit these!)
-*access_key*
-*secret_key*
-*.pem
-*.ppk
-*.key
-
-# Kubeconfig files
-**/kubeconfig
-**/.kube/
-~/.kube/config
-kubeconfig_*
-*.kubeconfig
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# Vim
-*.swp
-*.swo
-*~
-.*.swp
-
-# Environment variables
-.env
-.env.*
-*.env
-
-# Docker files 
-*.dockerignore
-**/docker-compose.override.yml
-
-# ============================================
-# CI/CD & Build Artifacts
-# ============================================
-
-# Build artifacts
-dist/
-build/
-node_modules/
+# ============================
+# Node.js (result service)
+# ============================
 **/node_modules/
-*.pyc
-__pycache__/
+**/npm-debug.log
+**/yarn-debug.log
+**/yarn-error.log
+**/package-lock.json
+**/yarn.lock
 
-# GitHub Actions (temporary files)
-.github/tmp/
-.github/.cache/
+# ============================
+# Python (vote service)
+# ============================
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/venv/
+**/env/
+**/dist/
+**/build/
+**/*.egg-info/
 
-# Helm charts (local packages)
-*.tgz
-**/charts/*.tgz
+# ============================
+# .NET (worker service)
+# ============================
+**/bin/
+**/obj/
+**/*.sln
+**/*.suo
+**/*.user
+**/*.userprefs
+**/mono_crash.*
+**/TestResults/
 
-# ============================================
-# Sensitive Files (Double-check these!)
-# ============================================
+# ============================
+# Docker
+# ============================
+**/.dockerignore
+**/docker-compose.override.yml
+**/.env
 
-# Never commit these!
-secrets/
-private/
-*.secret
-*.secrets
-secret.*
-credentials.*
-*.keychain
+# ============================
+# IDE / Editor files
+# ============================
+**/.vscode/
+**/.idea/
+**/*.swp
+**/*.swo
+**/*.bak
+**/*.tmp
 
-# SSH keys
-id_rsa
-id_dsa
-*.p12
-*.pfx
+# ============================
+# OS / System files
+# ============================
+**/.DS_Store
+**/Thumbs.db
+**/desktop.ini
+**/*.log
 
-# ============================================
-# Testing & Temporary Files
-# ============================================
+# ============================
+# Ansible / Monitoring (placeholder)
+# ============================
+**/ansible/*.retry
+**/ansible/inventory_*
+**/monitoring/*.db
+**/monitoring/*.log
 
-# Test reports
-test-results/
-coverage/
-*.test
-*.test.exe
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-
-# ============================================
-# Documentation (build output)
-# ============================================
-
-# Generated documentation
-docs/_build/
-site/
-
-# ============================================
-# Team-Specific Files
-# ============================================
-
-# Team member local configurations
-*.local
-*.local.*
-*-local
-*-personal
+# ============================
+# Misc temporary files
+# ============================
+**/*.tmp
+**/*.swp
+**/*.swo
+**/*~ 
