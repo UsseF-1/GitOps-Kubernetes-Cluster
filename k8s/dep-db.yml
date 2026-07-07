@@ -48,6 +48,9 @@ spec:
                 secretKeyRef:
                   name: secret
                   key: POSTGRES_PASSWORD
+                  
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
 
       volumes:
         - name: db-storage
