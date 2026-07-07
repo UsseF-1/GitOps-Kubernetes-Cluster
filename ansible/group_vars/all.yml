@@ -1,0 +1,7 @@
+---
+devops_user: devops
+
+packages:
+  - git
+  - curl
+  - unzip

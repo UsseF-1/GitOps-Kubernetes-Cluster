@@ -1,0 +1,6 @@
+---
+- import_playbook: playbooks/install-tools.yml
+
+- import_playbook: playbooks/create-user.yml
+
+- import_playbook: playbooks/ssh-hardening.yml
