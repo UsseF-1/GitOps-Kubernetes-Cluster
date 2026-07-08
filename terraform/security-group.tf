@@ -34,7 +34,7 @@ resource "aws_security_group" "eks_nodes" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+  depends_on = [aws_eks_node_group.main]
   tags = {
     Name = "${var.project_name}-eks-nodes-sg"
   }
