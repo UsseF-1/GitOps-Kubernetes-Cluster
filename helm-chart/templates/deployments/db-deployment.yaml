@@ -43,6 +43,8 @@ spec:
                 secretKeyRef:
                   name: {{ include "voting-app.secretName" . }}
                   key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: {{ .Values.db.pgdata | quote }}
           resources:
             {{- toYaml .Values.db.resources | nindent 12 }}
           readinessProbe:
