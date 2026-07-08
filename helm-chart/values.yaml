@@ -20,12 +20,12 @@ secret:
 vote:
   replicaCount: 1
   image:
-    repository: voting-app-vote
-    tag: "V1.0"
+    repository: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-vote
+    tag: latest
     pullPolicy: IfNotPresent
   containerPort: 80
   service:
-    name: svc-vote
+    name: vote
     port: 80
     type: ClusterIP
   resources:
@@ -57,12 +57,12 @@ vote:
 result:
   replicaCount: 1
   image:
-    repository: voting-app-result
-    tag: "V1.0"
+    repository: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-result
+    tag: latest
     pullPolicy: IfNotPresent
   containerPort: 4000
   service:
-    name: svc-result
+    name: result
     port: 4000
     type: ClusterIP
   resources:
@@ -94,8 +94,8 @@ result:
 worker:
   replicaCount: 1
   image:
-    repository: voting-app-worker
-    tag: "V1.0"
+    repository: 569033310103.dkr.ecr.us-east-1.amazonaws.com/voting-app-worker
+    tag: latest
     pullPolicy: IfNotPresent
   containerPort: 4000
   resources:
@@ -118,9 +118,10 @@ db:
     repository: postgres
     tag: "15-alpine"
     pullPolicy: IfNotPresent
+  pgdata: /var/lib/postgresql/data/pgdata
   containerPort: 5432
   service:
-    name: svc-db
+    name: db
     port: 5432
     type: ClusterIP
   resources:
@@ -150,7 +151,7 @@ redis:
     pullPolicy: IfNotPresent
   containerPort: 6379
   service:
-    name: svc-redis
+    name: redis
     port: 6379
     type: ClusterIP
   resources:
