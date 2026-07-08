@@ -32,15 +32,24 @@ jobs:
 
       - name: Build Vote Image
         run: |
-          docker build -t $ECR_VOTE:${{ github.sha }} -f docker/vote/dockerfile.Dockerfile docker/vote
+          docker build \
+            -t $ECR_VOTE:${{ github.sha }} \
+            -t $ECR_VOTE:latest \
+            -f docker/vote/dockerfile.Dockerfile docker/vote
 
       - name: Build Result Image
         run: |
-          docker build -t $ECR_RESULT:${{ github.sha }} -f docker/result/dockerfile.Dockerfile docker/result
+          docker build \
+            -t $ECR_RESULT:${{ github.sha }} \
+            -t $ECR_RESULT:latest \
+            -f docker/result/dockerfile.Dockerfile docker/result
 
       - name: Build Worker Image
         run: |
-          docker build -t $ECR_WORKER:${{ github.sha }} -f docker/worker/dockerfile.Dockerfile docker/worker
+          docker build \
+            -t $ECR_WORKER:${{ github.sha }} \
+            -t $ECR_WORKER:latest \
+            -f docker/worker/dockerfile.Dockerfile docker/worker
 
       - name: Scan Vote Image
         uses: aquasecurity/trivy-action@master
@@ -64,13 +73,19 @@ jobs:
           severity: CRITICAL
 
       - name: Push Vote Image
-        run: docker push $ECR_VOTE:${{ github.sha }}
+        run: |
+          docker push $ECR_VOTE:${{ github.sha }}
+          docker push $ECR_VOTE:latest
 
       - name: Push Result Image
-        run: docker push $ECR_RESULT:${{ github.sha }}
+        run: |
+          docker push $ECR_RESULT:${{ github.sha }}
+          docker push $ECR_RESULT:latest
 
       - name: Push Worker Image
-        run: docker push $ECR_WORKER:${{ github.sha }}
+        run: |
+          docker push $ECR_WORKER:${{ github.sha }}
+          docker push $ECR_WORKER:latest
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
