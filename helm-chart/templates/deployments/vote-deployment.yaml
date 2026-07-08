@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: vote
-          image: {{ include "voting-app.image" (dict "registry" .Values.registry "image" .Values.vote.image) }}
+          image: "{{ .Values.vote.image.repository }}:{{ .Values.vote.image.tag }}"
           imagePullPolicy: {{ .Values.vote.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.vote.containerPort }}
