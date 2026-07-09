@@ -1,0 +1,85 @@
+grafana:
+  enabled: true
+
+  service:
+    type: LoadBalancer
+
+  persistence:
+    enabled: true
+    storageClassName: storage-class-db
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  defaultDashboardsEnabled: true
+
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: default
+          orgId: 1
+          folder: Kubernetes
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+
+  dashboards:
+    default:
+      node-exporter:
+        gnetId: 1860
+        datasource: Prometheus
+
+      kubernetes-cluster:
+        gnetId: 315
+        datasource: Prometheus
+
+      kubernetes-global:
+        gnetId: 15757
+        datasource: Prometheus
+
+      kubernetes-nodes:
+        gnetId: 15759
+        datasource: Prometheus
+
+      kubernetes-pods:
+        gnetId: 15760
+        datasource: Prometheus
+
+      kubernetes-deployments:
+        gnetId: 15761
+        datasource: Prometheus
+
+prometheus:
+  service:
+    type: LoadBalancer
+
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: storage-class-db
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: storage-class-db
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
